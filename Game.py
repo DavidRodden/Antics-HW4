@@ -164,8 +164,6 @@ class Game(object):
     #
     # Description: the main game loop
     #
-    # ToDo:  This method is way too large and needs to be broken up
-    #
     ##
     def runGame(self):
         #build a list of things to place for player 1 in setup phase 1
