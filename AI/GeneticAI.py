@@ -54,6 +54,7 @@ class AIPlayer(Player):
     # does not yet include a mutation process
     #
     # length of mother & father should be equal as the size is based on the number of tiles
+    # git connection test with local setting of username & email
     def mateGenes(self, mother, father):
         size = len(mother) / 2
         return mother[:size] + father[size:], father[:size] + mother[size:]
