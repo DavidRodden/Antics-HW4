@@ -36,11 +36,17 @@ class AIPlayer(Player):
         super(AIPlayer, self).__init__(inputPlayerId, "Genetic")
         self.pool = None
         self.poolIndex = None
-        self.currentPopFitness = None
+        self.currentPopFitness = []
 
     # initialize the population of genes with random values
     # then resets the fitness list to default values
     def initializeGenePopulation(self):
+        # gene includes tuples of board position, random large number
+        for i in range(0, 10):
+            for j in range(0, 4):
+                self.currentPopFitness.append((i, j), random.uniform(-float("inf"), float("inf")))
+        # reset list to default values?
+
 
     ##
     # getPlacement
