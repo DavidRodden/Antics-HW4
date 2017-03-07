@@ -54,7 +54,6 @@ class AIPlayer(Player):
     # does not yet include a mutation process
     #
     # length of mother & father should be equal as the size is based on the number of tiles
-    # git connection test with local setting of username & email
     def mateGenes(self, mother, father):
         size = len(mother) / 2
         return mother[:size] + father[size:], father[:size] + mother[size:]
@@ -62,7 +61,7 @@ class AIPlayer(Player):
     # method to generate the next generation of genes from the old one
     # returns the top 5% of the population based on the maximum score obtained from a gene
     def generateNextGenes(self):
-        return sorted(self.pool, key=lambda x: x[1])[:len(self.pool)/20]
+        return sorted(self.pool, key=lambda x: x[1])[:len(self.pool) / 20]
 
     ##
     # getPlacement
@@ -150,3 +149,11 @@ class AIPlayer(Player):
     def getAttack(self, currentState, attackingAnt, enemyLocations):
         # Attack a random enemy.
         return enemyLocations[random.randint(0, len(enemyLocations) - 1)]
+
+    # override Player.py function
+    # Update the fitness score of the current gene depending on whether the agent has won or lost
+    # Judge whether the current gene's fitness has been fully evaluated & advance to next gene
+    def registerWin(self, hasWon):
+        # currentPopFitness is based on the highest score attained by the gene
+        self.currentPopFitness.append(self.pool[-1][1])
+        return hasWon
