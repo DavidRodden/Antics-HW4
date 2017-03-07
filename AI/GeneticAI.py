@@ -49,6 +49,8 @@ class AIPlayer(Player):
 
     # generates two child genes from mother and father parent genes
     # does not yet include a mutation process
+    #
+    # length of mother & father should be equal as the size is based on the number of tiles
     def mateGenes(self, mother, father):
         size = len(mother) / 2
         return mother[:size] + father[size:], father[:size] + mother[size:]
