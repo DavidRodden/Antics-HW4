@@ -40,6 +40,7 @@ class AIPlayer(Player):
 
     # initialize the population of genes with random values
     # then resets the fitness list to default values
+    #test alter
     def initializeGenePopulation(self):
         # gene includes tuples of board position, random large number
         for i in range(0, 10):
