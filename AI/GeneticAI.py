@@ -34,18 +34,21 @@ class AIPlayer(Player):
     ##
     def __init__(self, inputPlayerId):
         super(AIPlayer, self).__init__(inputPlayerId, "Genetic")
-        self.pool = None
+        self.pool = []
         self.poolIndex = None
-        self.currentPopFitness = []
+        self.currentPopFitness = None
 
     # initialize the population of genes with random values
     # then resets the fitness list to default values
     def initializeGenePopulation(self):
         # gene includes tuples of board position, random large number
+        gene = []
         for i in range(0, 10):
             for j in range(0, 4):
-                self.currentPopFitness.append((i, j), random.uniform(-float("inf"), float("inf")))
-                # reset list to default values?
+                gene.append((i, j), random.uniform(-float("inf"), float("inf")))
+        # add gene with respective highscore to the gene pool
+        self.pool.append((gene, 0))
+        # reset list to default values?
 
     # generates two child genes from mother and father parent genes
     # does not yet include a mutation process
@@ -54,6 +57,11 @@ class AIPlayer(Player):
     def mateGenes(self, mother, father):
         size = len(mother) / 2
         return mother[:size] + father[size:], father[:size] + mother[size:]
+
+    # method to generate the next generation of genes from the old one
+    # returns the top 5% of the population based on the maximum score obtained from a gene
+    def generateNextGenes(self):
+        return sorted(self.pool, key=lambda x: x[1])[:len(self.pool)/20]
 
     ##
     # getPlacement
