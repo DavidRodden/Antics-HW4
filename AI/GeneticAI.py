@@ -27,15 +27,20 @@ class AIPlayer(Player):
     # Parameters:
     #   inputPlayerId - The id to give the new player (int)
     #
-    # pool - array of populations
+    # pool - current population of genes
     # poolIndex - index pointing to the current population in the pool
     # currentPopFitness - current population being examined
     #
+    ##
     def __init__(self, inputPlayerId):
         super(AIPlayer, self).__init__(inputPlayerId, "Genetic")
         self.pool = None
         self.poolIndex = None
         self.currentPopFitness = None
+
+    # initialize the population of genes with random values
+    # then resets the fitness list to default values
+    def initializeGenePopulation(self):
 
     ##
     # getPlacement
