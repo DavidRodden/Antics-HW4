@@ -132,7 +132,7 @@ class AIPlayer(Player):
             foodloc = []
             sortedtheirs = sorted(self.pool[self.poolIndex][0][40:], key=lambda x: x[1])
             for loc in sortedtheirs:
-                if self.getConstrAt(currentState, loc[0]) is not None:
+                if self.getConstrAt(currentState, loc[0]) is None:
                     foodloc.append(loc[0])
                     if len(foodloc) == 2:
                         break
