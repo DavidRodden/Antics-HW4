@@ -10,6 +10,7 @@ from Move import Move
 from GameState import *
 from AIPlayerUtils import *
 
+
 ## by yours truly
 
 ##
@@ -65,8 +66,11 @@ class AIPlayer(Player):
     #
     # length of mother & father should be equal as the size is based on the number of tiles
     def mateGenes(self, mother, father):
-        size = len(mother) / 2
-        return mother[:size] + father[size:], father[:size] + mother[size:]
+        delimiter = len(mother) / 2
+        ourSplit = random.randint(0, delimiter)
+        theirSplit = random.randint(delimiter, len(mother))
+        return mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:], \
+               father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]
 
     # method to generate the next generation of genes from the old one
     # returns the top 5% of the population based on the maximum score obtained from a gene
