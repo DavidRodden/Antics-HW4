@@ -81,9 +81,29 @@ class AIPlayer(Player):
                 
 
     # method to generate the next generation of genes from the old one
-    # returns the top 5% of the population based on the maximum score obtained from a gene
+    # returns the next generation of genes based on the top 5% of the population based
+    # on the maximum score obtained from a gene
     def generateNextGenes(self):
-        return sorted(self.pool, key=lambda x: x[1])[:len(self.pool) / 20]
+        top = sorted(self.pool, key=lambda x: x[1])[:len(self.pool) / 20]
+
+        nextGen = []
+        for i in range(0,len(self.pool)/2):
+            mother = random.randint(0,len(self.pool)-1)
+            father = random.randint(0,len(self.pool)-1)
+
+            # save the fittest
+            fit = random.uniform(0,1)
+            if fit > 0.5:
+                mother = random.randint(0,len(self.pool)-1)
+            fit = random.uniform(0,1)
+            if fit > 0.5:
+                father = random.randint(0,len(self.pool)-1)
+
+            for child in self.mateGenes(mother,father):
+                nextGen.append(child)
+
+            return nextGen
+            
 
     ##
     # getPlacement
