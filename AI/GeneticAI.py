@@ -39,6 +39,7 @@ class AIPlayer(Player):
         self.pool = []
         self.poolIndex = None
         self.currentPopFitness = None
+        self.currgenescores = []
 
     # initialize the population of genes with random values
     # then resets the fitness list to default values
@@ -119,43 +120,23 @@ class AIPlayer(Player):
     #
     # Return: The coordinates of where the construction is to be placed
     ##
+
+    ###--------========= last thing we worked on ===========----------###
     def getPlacement(self, currentState):
         numToPlace = 0
         # implemented by students to return their next move
         if currentState.phase == SETUP_PHASE_1:  # stuff on my side
-            numToPlace = 11
-            moves = []
-            for i in range(0, numToPlace):
-                move = None
-                while move == None:
-                    # Choose any x location
-                    x = random.randint(0, 9)
-                    # Choose any y location on your side of the board
-                    y = random.randint(0, 3)
-                    # Set the move if this space is empty
-                    if currentState.board[x][y].constr == None and (x, y) not in moves:
-                        move = (x, y)
-                        # Just need to make the space non-empty. So I threw whatever I felt like in there.
-                        currentState.board[x][y].constr == True
-                moves.append(move)
-            return moves
+            places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1])[:11]
+            return [p[0] for p in places]
         elif currentState.phase == SETUP_PHASE_2:  # stuff on foe's side
-            numToPlace = 2
-            moves = []
-            for i in range(0, numToPlace):
-                move = None
-                while move == None:
-                    # Choose any x location
-                    x = random.randint(0, 9)
-                    # Choose any y location on enemy side of the board
-                    y = random.randint(6, 9)
-                    # Set the move if this space is empty
-                    if currentState.board[x][y].constr == None and (x, y) not in moves:
-                        move = (x, y)
-                        # Just need to make the space non-empty. So I threw whatever I felt like in there.
-                        currentState.board[x][y].constr == True
-                moves.append(move)
-            return moves
+            foodloc = []
+            sortedtheirs = sorted(self.pool[self.poolIndex][0][40:], key=lambda x: x[1])
+            for loc in sortedtheirs:
+                if self.getConstrAt(currentState, loc[0]) is not None:
+                    foodloc.append(loc[0])
+                    if len(foodloc) == 2:
+                        break
+            return foodloc
         else:
             return [(0, 0)]
 
