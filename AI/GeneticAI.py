@@ -69,8 +69,16 @@ class AIPlayer(Player):
         delimiter = len(mother) / 2
         ourSplit = random.randint(0, delimiter)
         theirSplit = random.randint(delimiter, len(mother))
-        return mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:], \
-               father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]
+        children = [mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:], \
+               father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]]
+        for child in children:
+            mutate = random.uniform(0,1)
+            if mutate > 0.8:
+                index = random.randint(0,len(child)-1)
+                newval = random.uniform(sys.float_info.min, sys.float_info.max)
+                child[index] = newval
+        return children
+                
 
     # method to generate the next generation of genes from the old one
     # returns the top 5% of the population based on the maximum score obtained from a gene
