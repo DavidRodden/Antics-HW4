@@ -44,7 +44,7 @@ class AIPlayer(Player):
     #
     def initializeGenePopulation(self, popSize):
         # index set to 0 for the initialization of a population
-        self.currentPopFitness = 0
+        self.poolIndex = 0
         # gene includes tuples of board position, random large number
         gene = []
         for g in range(0, popSize):
