@@ -52,11 +52,11 @@ class AIPlayer(Player):
             # grass and hills
             for i in range(0, 10):
                 for j in range(0, 4):
-                    gene.append(((i, j), random.uniform(-float("inf"), float("inf"))))
+                    gene.append(((i, j), random.uniform(sys.float_info.min, sys.float_info.max)))
             # food
             for i in range(0, 10):
                 for j in range(6, 10):
-                    gene.append(((i, j), random.uniform(-float("inf"), float("inf"))))
+                    gene.append(((i, j), random.uniform(sys.float_info.min, sys.float_info.max)))
             # add gene with respective highscore to the gene pool
             self.pool.append((gene, 0))
             # reset list to default values?
