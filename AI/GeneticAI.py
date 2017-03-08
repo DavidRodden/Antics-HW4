@@ -40,15 +40,17 @@ class AIPlayer(Player):
 
     # initialize the population of genes with random values
     # then resets the fitness list to default values
-    def initializeGenePopulation(self):
+    #
+    def initializeGenePopulation(self, popSize):
         # gene includes tuples of board position, random large number
         gene = []
-        for i in range(0, 10):
-            for j in range(0, 4):
-                gene.append((i, j), random.uniform(-float("inf"), float("inf")))
-        # add gene with respective highscore to the gene pool
-        self.pool.append((gene, 0))
-        # reset list to default values?
+        for g in range(0, popSize):
+            for i in range(0, 10):
+                for j in range(0, 4):
+                    gene.append((i, j), random.uniform(-float("inf"), float("inf")))
+            # add gene with respective highscore to the gene pool
+            self.pool.append((gene, 0))
+            # reset list to default values?
 
     # generates two child genes from mother and father parent genes
     # does not yet include a mutation process
@@ -155,5 +157,5 @@ class AIPlayer(Player):
     # Judge whether the current gene's fitness has been fully evaluated & advance to next gene
     def registerWin(self, hasWon):
         # currentPopFitness is based on the highest score attained by the gene
-        self.currentPopFitness.append(self.pool[-1][1])
+        self.currentPopFitness.append(self.pool[self.poolIndex][1])
         return hasWon
