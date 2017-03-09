@@ -49,6 +49,7 @@ class AIPlayer(Player):
         self.lastStart = -5 # last start time of a game
         self.numGamesPerGene = 5 # number of games to play per gene
         self.poolStates = [] # need to save states in parallel with the pool to print
+        self.topCutoff = 5
 
         self.initializeGenePopulation()
 
@@ -62,16 +63,19 @@ class AIPlayer(Player):
         gene = []
         for g in range(0, self.popSize):
             # grass and hills
-            for i in range(0, 10):
-                for j in range(0, 4):
-                    gene.append(((i, j), random.randint(0,self.max/2)))#random.uniform(sys.float_info.min, sys.float_info.max)))
+            for x in range(0, 10):
+                for y in range(0, 4):
+                    gene.append([(x, y), random.randint(0,self.max/2)])#random.uniform(sys.float_info.min, sys.float_info.max)))
             # food
             for x in range(0, 10):
                 for y in range(6, 10):
 ##                    print((x,y))
-                    gene.append(((x, y), random.randint(0,self.max/2)))#random.uniform(sys.float_info.min, sys.float_info.max)))
+                    gene.append([(x, y), random.randint(0,self.max/2)])#random.uniform(sys.float_info.min, sys.float_info.max)))
             # add gene with respective highscore to the gene pool
             self.pool.append([gene, 0])
+##            print("\n gene\n")
+##            print(gene)
+##            print("\n")
             gene = []
 ##            if g == 0:
 ####                print(gene)
@@ -85,18 +89,29 @@ class AIPlayer(Player):
     def mateGenes(self, mom, dad):
         # get the gene
         mother = mom[0]
+        print(mother)
         father = dad[0]
         
-        delimiter = len(mother) / 2
+        delimiter = len(mother) / 2 #40
         ourSplit = random.randint(0, delimiter)
         theirSplit = random.randint(delimiter, len(mother))
-        children = [mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:], \
-               father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]]
+        
+        print("\n\n\n\n\n")
+        print(ourSplit)
+        print(theirSplit)
+        print(len(mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:]))
+        print([mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:],0])
+        print("\n\n\n\n\n")
+
+        gene1 = mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:]
+        gene2 = father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]
+        children = [ [gene1,0], [gene2,0] ]
         for child in children:
             mutate = random.uniform(0,1)
             if mutate > 0.8:
-                index = random.randint(0,len(child)-1)
-                newval = random.random.randint(0,self.max/2)#uniform(sys.float_info.min, sys.float_info.max)
+                index = random.randint(0,len(child[0])-1)
+                newval = random.randint(0,self.max/2)#uniform(sys.float_info.min, sys.float_info.max)
+                print(child)
                 child[0][index][1] = newval # value change -- [gene -- [(point,value),...], score]
         return children
                 
@@ -105,7 +120,7 @@ class AIPlayer(Player):
     # returns the next generation of genes based on the top 5% of the population based
     # on the maximum score obtained from a gene
     def generateNextGenes(self):
-        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:5]#len(self.pool) / 20]
+        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:self.topCutoff]#len(self.pool) / 20]
 
         nextGen = []
         for i in range(0,len(self.pool)/2):
@@ -127,7 +142,7 @@ class AIPlayer(Player):
             for child in self.mateGenes(mother,father):
                 nextGen.append(child)
 
-            return nextGen
+        return nextGen
             
 
     ##
@@ -151,6 +166,9 @@ class AIPlayer(Player):
         # implemented by students to return their next move
         if currentState.phase == SETUP_PHASE_1:  # stuff on my side
             self.lastStart = time.clock() # set the time of the last start of the game
+##            print("\n setup gene\n")
+##            print(self.pool[self.poolIndex][0])
+##            print("\n")
             places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11]
 ##            print(sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11])
 ##            print(len(self.pool[self.poolIndex][0][:40]))
@@ -241,6 +259,8 @@ class AIPlayer(Player):
             self.poolIndex = 0
             self.poolStates = []
             self.pool = self.generateNextGenes()
+            print(len(self.pool))
+##            print(self.pool[0])
         
             
         return hasWon
