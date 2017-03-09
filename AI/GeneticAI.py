@@ -45,11 +45,11 @@ class AIPlayer(Player):
         ###
         self.max = 200000000
         self.popSize = 10#100
-##        self.longestTimeAvg = -5 # longest average time for a placement in this pop
         self.lastStart = -5 # last start time of a game
         self.numGamesPerGene = 5 # number of games to play per gene
         self.poolStates = [] # need to save states in parallel with the pool to print
         self.topCutoff = 5
+        self.evidenceFile = "CS421_HW4_EvidenceFile_perkinss18_roddend17.txt"
 
         self.initializeGenePopulation()
 
@@ -65,22 +65,14 @@ class AIPlayer(Player):
             # grass and hills
             for x in range(0, 10):
                 for y in range(0, 4):
-                    gene.append([(x, y), random.randint(0,self.max/2)])#random.uniform(sys.float_info.min, sys.float_info.max)))
+                    gene.append([(x, y), random.randint(0,self.max/2)])
             # food
             for x in range(0, 10):
                 for y in range(6, 10):
-##                    print((x,y))
-                    gene.append([(x, y), random.randint(0,self.max/2)])#random.uniform(sys.float_info.min, sys.float_info.max)))
+                    gene.append([(x, y), random.randint(0,self.max/2)])
             # add gene with respective highscore to the gene pool
             self.pool.append([gene, 0])
-##            print("\n gene\n")
-##            print(gene)
-##            print("\n")
             gene = []
-##            if g == 0:
-####                print(gene)
-##                print(len(gene))
-            # reset list to default values?
 
     # generates two child genes from mother and father parent genes
     # does not yet include a mutation process
@@ -89,19 +81,11 @@ class AIPlayer(Player):
     def mateGenes(self, mom, dad):
         # get the gene
         mother = mom[0]
-        print(mother)
         father = dad[0]
         
         delimiter = len(mother) / 2 #40
         ourSplit = random.randint(0, delimiter)
         theirSplit = random.randint(delimiter, len(mother))
-        
-        print("\n\n\n\n\n")
-        print(ourSplit)
-        print(theirSplit)
-        print(len(mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:]))
-        print([mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:],0])
-        print("\n\n\n\n\n")
 
         gene1 = mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:]
         gene2 = father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]
@@ -110,8 +94,7 @@ class AIPlayer(Player):
             mutate = random.uniform(0,1)
             if mutate > 0.8:
                 index = random.randint(0,len(child[0])-1)
-                newval = random.randint(0,self.max/2)#uniform(sys.float_info.min, sys.float_info.max)
-                print(child)
+                newval = random.randint(0,self.max/2)
                 child[0][index][1] = newval # value change -- [gene -- [(point,value),...], score]
         return children
                 
@@ -120,7 +103,7 @@ class AIPlayer(Player):
     # returns the next generation of genes based on the top 5% of the population based
     # on the maximum score obtained from a gene
     def generateNextGenes(self):
-        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:self.topCutoff]#len(self.pool) / 20]
+        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:self.topCutoff]
 
         nextGen = []
         for i in range(0,len(self.pool)/2):
@@ -166,18 +149,11 @@ class AIPlayer(Player):
         # implemented by students to return their next move
         if currentState.phase == SETUP_PHASE_1:  # stuff on my side
             self.lastStart = time.clock() # set the time of the last start of the game
-##            print("\n setup gene\n")
-##            print(self.pool[self.poolIndex][0])
-##            print("\n")
             places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11]
-##            print(sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11])
-##            print(len(self.pool[self.poolIndex][0][:40]))
             return [p[0] for p in places]
         elif currentState.phase == SETUP_PHASE_2:  # stuff on foe's side
             foodloc = []
             sortedtheirs = sorted(self.pool[self.poolIndex][0][40:], key=lambda x: x[1], reverse = True)
-##            print(len(self.pool[self.poolIndex][0][40:80]))
-##            print([x[0] for x in self.pool[self.poolIndex][0][40:]])
             for loc in sortedtheirs:
                 if getConstrAt(currentState, loc[0]) is None:
                     foodloc.append(loc[0])
@@ -228,10 +204,6 @@ class AIPlayer(Player):
     # Update the fitness score of the current gene depending on whether the agent has won or lost
     # Judge whether the current gene's fitness has been fully evaluated & advance to next gene
     def registerWin(self, hasWon):
-        print(hasWon)
-        # currentPopFitness is based on the highest score attained by the gene
-##        self.currentPopFitness.append(self.pool[self.poolIndex][1])
-
         # stop the clock
         survivedfor = time.clock() - self.lastStart
         # set the score for the gene based on winning or time of survival
@@ -259,8 +231,6 @@ class AIPlayer(Player):
             self.poolIndex = 0
             self.poolStates = []
             self.pool = self.generateNextGenes()
-            print(len(self.pool))
-##            print(self.pool[0])
         
             
         return hasWon
@@ -276,6 +246,8 @@ class AIPlayer(Player):
     #    state - the state to print
     #
     def asciiPrintState(self, state):
+        f = open(self.evidenceFile, "a")
+        
         #select coordinate ranges such that board orientation will match the GUI
         #for either player
         coordRange = range(0,10)
@@ -286,6 +258,7 @@ class AIPlayer(Player):
 
         #print the board with a border of column/row indexes
         print colIndexes
+        f.write(colIndexes + "\n")
         index = 0              #row index
         for x in coordRange:
             row = str(x)
@@ -305,10 +278,15 @@ class AIPlayer(Player):
                 else:
                     row += "."
             print row + str(x)
+            f.write(row + str(x)+"\n")
             index += 1
         print colIndexes
+        f.write(colIndexes+"\n")
 
         #print food totals
         p1Food = state.inventories[0].foodCount
         p2Food = state.inventories[1].foodCount
         print " food: " + str(p1Food) + "/" + str(p2Food)
+        f.write(" food: " + str(p1Food) + "/" + str(p2Food) + "\n")
+
+        f.close()
