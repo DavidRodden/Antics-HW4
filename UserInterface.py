@@ -638,6 +638,7 @@ class UserInterface(object):
         for key in self.buttons:
             self.drawButton(key, self.buttons)
         #Show everything I've drawn by posting self.screen to the monitor.
+##        if not self.tournamentInProgress:
         pygame.display.flip()
     
     ##
