@@ -44,7 +44,7 @@ class AIPlayer(Player):
 
         ###
         self.max = 200000000
-        self.popSize = 100
+        self.popSize = 10#100
 ##        self.longestTimeAvg = -5 # longest average time for a placement in this pop
         self.lastStart = -5 # last start time of a game
         self.numGamesPerGene = 5 # number of games to play per gene
@@ -105,7 +105,7 @@ class AIPlayer(Player):
     # returns the next generation of genes based on the top 5% of the population based
     # on the maximum score obtained from a gene
     def generateNextGenes(self):
-        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:len(self.pool) / 20]
+        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:5]#len(self.pool) / 20]
 
         nextGen = []
         for i in range(0,len(self.pool)/2):
@@ -118,11 +118,11 @@ class AIPlayer(Player):
             fit = random.uniform(0,1)
             if fit > 0.5:
                 m = random.randint(0,len(top)-1)
-                mother = self.top[m]
+                mother = top[m]
             fit = random.uniform(0,1)
             if fit > 0.5:
                 f = random.randint(0,len(top)-1)
-                father = self.top[f]
+                father = top[f]
 
             for child in self.mateGenes(mother,father):
                 nextGen.append(child)
@@ -152,7 +152,7 @@ class AIPlayer(Player):
         if currentState.phase == SETUP_PHASE_1:  # stuff on my side
             self.lastStart = time.clock() # set the time of the last start of the game
             places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11]
-            print(sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11])
+##            print(sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11])
 ##            print(len(self.pool[self.poolIndex][0][:40]))
             return [p[0] for p in places]
         elif currentState.phase == SETUP_PHASE_2:  # stuff on foe's side
@@ -179,6 +179,10 @@ class AIPlayer(Player):
     # Return: The Move to be made
     ##
     def getMove(self, currentState):
+        #grab the initial state
+        if self.poolIndex == len(self.poolStates):
+            self.poolStates.append(currentState)
+        
         moves = listAllLegalMoves(currentState)
         selectedMove = moves[random.randint(0, len(moves) - 1)];
 
@@ -206,6 +210,7 @@ class AIPlayer(Player):
     # Update the fitness score of the current gene depending on whether the agent has won or lost
     # Judge whether the current gene's fitness has been fully evaluated & advance to next gene
     def registerWin(self, hasWon):
+        print(hasWon)
         # currentPopFitness is based on the highest score attained by the gene
 ##        self.currentPopFitness.append(self.pool[self.poolIndex][1])
 
@@ -218,16 +223,24 @@ class AIPlayer(Player):
         # check to see if we have completed the last game for a gene
         if len(self.currgenescores) == self.numGamesPerGene:
             # average the scores and set it for the gene
-            avgscore = (float)(sum(self.currgenescores))/(float)(len(self.self.currgenescores))
+            avgscore = (float)(sum(self.currgenescores))/(float)(len(self.currgenescores))
             self.pool[self.poolIndex][1] = avgscore
             self.currgenescores = []
             self.poolIndex += 1
 
         # check to see if we need to start a new generation
         if self.poolIndex == self.popSize:
+            
+            # get the gene with the best score, and its state pool = [(gene,score)...]
+            genFittest = sorted(self.pool, key=lambda x:x[1], reverse = True)[0]
+            fittestState = self.poolStates[self.pool.index(genFittest)]
+            self.asciiPrintState(fittestState)
+            print("score = " + str(genFittest[1]))
+
+            # reset stuff
             self.poolIndex = 0
-            # get the gene with the best score, and its state
-            maxstate = sorted(zip(self.pool, self.poolStates), key)
+            self.poolStates = []
+            self.pool = self.generateNextGenes()
         
             
         return hasWon
@@ -242,7 +255,7 @@ class AIPlayer(Player):
     # Parameters:
     #    state - the state to print
     #
-    def asciiPrintState(state):
+    def asciiPrintState(self, state):
         #select coordinate ranges such that board orientation will match the GUI
         #for either player
         coordRange = range(0,10)
@@ -258,14 +271,19 @@ class AIPlayer(Player):
             row = str(x)
             for y in coordRange:
                 ant = getAntAt(state, (y, x))
-                if (ant != None):
-                    row += charRepAnt(ant)
+##                if (ant != None):
+##                    row += charRepAnt(ant)
+##                else:
+##                    constr = getConstrAt(state, (y, x))
+##                    if (constr != None):
+##                        row += charRepConstr(constr)
+##                    else:
+##                        row += "."
+                constr = getConstrAt(state, (y, x))
+                if (constr != None):
+                    row += charRepConstr(constr)
                 else:
-                    constr = getConstrAt(state, (y, x))
-                    if (constr != None):
-                        row += charRepConstr(constr)
-                    else:
-                        row += "."
+                    row += "."
             print row + str(x)
             index += 1
         print colIndexes
