@@ -44,10 +44,10 @@ class AIPlayer(Player):
 
         ###
         self.max = 200000000
-        self.popSize = 10#100
-        self.lastStart = -5 # last start time of a game
-        self.numGamesPerGene = 5 # number of games to play per gene
-        self.poolStates = [] # need to save states in parallel with the pool to print
+        self.popSize = 10  # 100
+        self.lastStart = -5  # last start time of a game
+        self.numGamesPerGene = 5  # number of games to play per gene
+        self.poolStates = []  # need to save states in parallel with the pool to print
         self.topCutoff = 5
         self.evidenceFile = "CS421_HW4_EvidenceFile_perkinss18_roddend17.txt"
 
@@ -65,11 +65,11 @@ class AIPlayer(Player):
             # grass and hills
             for x in range(0, 10):
                 for y in range(0, 4):
-                    gene.append([(x, y), random.randint(0,self.max/2)])
+                    gene.append([(x, y), random.randint(0, self.max / 2)])
             # food
             for x in range(0, 10):
                 for y in range(6, 10):
-                    gene.append([(x, y), random.randint(0,self.max/2)])
+                    gene.append([(x, y), random.randint(0, self.max / 2)])
             # add gene with respective highscore to the gene pool
             self.pool.append([gene, 0])
             gene = []
@@ -82,51 +82,49 @@ class AIPlayer(Player):
         # get the gene
         mother = mom[0]
         father = dad[0]
-        
-        delimiter = len(mother) / 2 #40
+
+        delimiter = len(mother) / 2  # 40
         ourSplit = random.randint(0, delimiter)
         theirSplit = random.randint(delimiter, len(mother))
 
         gene1 = mother[:ourSplit] + father[ourSplit: delimiter] + mother[delimiter:theirSplit] + father[theirSplit:]
         gene2 = father[:ourSplit] + mother[ourSplit: delimiter] + father[delimiter: theirSplit] + mother[theirSplit:]
-        children = [ [gene1,0], [gene2,0] ]
+        children = [[gene1, 0], [gene2, 0]]
         for child in children:
-            mutate = random.uniform(0,1)
+            mutate = random.uniform(0, 1)
             if mutate > 0.8:
-                index = random.randint(0,len(child[0])-1)
-                newval = random.randint(0,self.max/2)
-                child[0][index][1] = newval # value change -- [gene -- [(point,value),...], score]
+                index = random.randint(0, len(child[0]) - 1)
+                newval = random.randint(0, self.max / 2)
+                child[0][index][1] = newval  # value change -- [gene -- [(point,value),...], score]
         return children
-                
 
     # method to generate the next generation of genes from the old one
     # returns the next generation of genes based on the top 5% of the population based
     # on the maximum score obtained from a gene
     def generateNextGenes(self):
-        top = sorted(self.pool, key=lambda x: x[1], reverse = True)[:self.topCutoff]
+        top = sorted(self.pool, key=lambda x: x[1], reverse=True)[:self.topCutoff]
 
         nextGen = []
-        for i in range(0,len(self.pool)/2):
-            m = random.randint(0,len(self.pool)-1)
+        for i in range(0, len(self.pool) / 2):
+            m = random.randint(0, len(self.pool) - 1)
             mother = self.pool[m]
-            f = random.randint(0,len(self.pool)-1)
+            f = random.randint(0, len(self.pool) - 1)
             father = self.pool[f]
 
             # save the fittest
-            fit = random.uniform(0,1)
+            fit = random.uniform(0, 1)
             if fit > 0.5:
-                m = random.randint(0,len(top)-1)
+                m = random.randint(0, len(top) - 1)
                 mother = top[m]
-            fit = random.uniform(0,1)
+            fit = random.uniform(0, 1)
             if fit > 0.5:
-                f = random.randint(0,len(top)-1)
+                f = random.randint(0, len(top) - 1)
                 father = top[f]
 
-            for child in self.mateGenes(mother,father):
+            for child in self.mateGenes(mother, father):
                 nextGen.append(child)
 
         return nextGen
-            
 
     ##
     # getPlacement
@@ -148,12 +146,12 @@ class AIPlayer(Player):
         numToPlace = 0
         # implemented by students to return their next move
         if currentState.phase == SETUP_PHASE_1:  # stuff on my side
-            self.lastStart = time.clock() # set the time of the last start of the game
-            places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse = True)[:11]
+            self.lastStart = time.clock()  # set the time of the last start of the game
+            places = sorted(self.pool[self.poolIndex][0][:40], key=lambda x: x[1], reverse=True)[:11]
             return [p[0] for p in places]
         elif currentState.phase == SETUP_PHASE_2:  # stuff on foe's side
             foodloc = []
-            sortedtheirs = sorted(self.pool[self.poolIndex][0][40:], key=lambda x: x[1], reverse = True)
+            sortedtheirs = sorted(self.pool[self.poolIndex][0][40:], key=lambda x: x[1], reverse=True)
             for loc in sortedtheirs:
                 if getConstrAt(currentState, loc[0]) is None:
                     foodloc.append(loc[0])
@@ -173,10 +171,10 @@ class AIPlayer(Player):
     # Return: The Move to be made
     ##
     def getMove(self, currentState):
-        #grab the initial state
+        # grab the initial state
         if self.poolIndex == len(self.poolStates):
             self.poolStates.append(currentState)
-        
+
         moves = listAllLegalMoves(currentState)
         selectedMove = moves[random.randint(0, len(moves) - 1)];
 
@@ -207,22 +205,21 @@ class AIPlayer(Player):
         # stop the clock
         survivedfor = time.clock() - self.lastStart
         # set the score for the gene based on winning or time of survival
-        roundscore = self.max if hasWon else survivedfor/100000
+        roundscore = self.max - survivedfor if hasWon else survivedfor / 100000
         self.currgenescores.append(roundscore)
 
         # check to see if we have completed the last game for a gene
         if len(self.currgenescores) == self.numGamesPerGene:
             # average the scores and set it for the gene
-            avgscore = (float)(sum(self.currgenescores))/(float)(len(self.currgenescores))
+            avgscore = (float)(sum(self.currgenescores)) / (float)(len(self.currgenescores))
             self.pool[self.poolIndex][1] = avgscore
             self.currgenescores = []
             self.poolIndex += 1
 
         # check to see if we need to start a new generation
         if self.poolIndex == self.popSize:
-            
             # get the gene with the best score, and its state pool = [(gene,score)...]
-            genFittest = sorted(self.pool, key=lambda x:x[1], reverse = True)[0]
+            genFittest = sorted(self.pool, key=lambda x: x[1], reverse=True)[0]
             fittestState = self.poolStates[self.pool.index(genFittest)]
             self.asciiPrintState(fittestState)
             print("score = " + str(genFittest[1]))
@@ -231,11 +228,10 @@ class AIPlayer(Player):
             self.poolIndex = 0
             self.poolStates = []
             self.pool = self.generateNextGenes()
-        
-            
+
         return hasWon
 
-######## going to need to refab this later
+    ######## going to need to refab this later
     ##
     # asciiPrintState
     #
@@ -247,43 +243,34 @@ class AIPlayer(Player):
     #
     def asciiPrintState(self, state):
         f = open(self.evidenceFile, "a")
-        
-        #select coordinate ranges such that board orientation will match the GUI
-        #for either player
-        coordRange = range(0,10)
+
+        # select coordinate ranges such that board orientation will match the GUI
+        # for either player
+        coordRange = range(0, 10)
         colIndexes = " 0123456789"
         if (state.whoseTurn == PLAYER_TWO):
-            coordRange = range(9,-1,-1)
+            coordRange = range(9, -1, -1)
             colIndexes = " 9876543210"
 
-        #print the board with a border of column/row indexes
+        # print the board with a border of column/row indexes
         print colIndexes
         f.write(colIndexes + "\n")
-        index = 0              #row index
+        index = 0  # row index
         for x in coordRange:
             row = str(x)
             for y in coordRange:
-                ant = getAntAt(state, (y, x))
-##                if (ant != None):
-##                    row += charRepAnt(ant)
-##                else:
-##                    constr = getConstrAt(state, (y, x))
-##                    if (constr != None):
-##                        row += charRepConstr(constr)
-##                    else:
-##                        row += "."
                 constr = getConstrAt(state, (y, x))
-                if (constr != None):
+                if constr is not None:
                     row += charRepConstr(constr)
                 else:
                     row += "."
             print row + str(x)
-            f.write(row + str(x)+"\n")
+            f.write(row + str(x) + "\n")
             index += 1
         print colIndexes
-        f.write(colIndexes+"\n")
+        f.write(colIndexes + "\n")
 
-        #print food totals
+        # print food totals
         p1Food = state.inventories[0].foodCount
         p2Food = state.inventories[1].foodCount
         print " food: " + str(p1Food) + "/" + str(p2Food)
