@@ -11,51 +11,54 @@ from Move import Move
 from GameState import *
 from AIPlayerUtils import *
 
-
-## by yours truly
-
 ##
 # AIPlayer
 # Description: The responsbility of this class is to interact with the game by
 # deciding a valid move based on a given game state. This class has methods that
 # will be implemented by students in Dr. Nuxoll's AI course.
 #
+# Authors: David Rodden, Sara Perkins
+# Version: 9 March 2017
+#
 # Variables:
 #   playerId - The id of the player.
 ##
 class AIPlayer(Player):
+    ##
     # __init__
     # Description: Creates a new Player
     #
     # Parameters:
     #   inputPlayerId - The id to give the new player (int)
-    #
-    # pool - current population of genes
-    # poolIndex - index pointing to the current population in the pool
-    # currentPopFitness - current population being examined
-    #
+    #   pool - current population of genes
+    #   poolIndex - index pointing to the current population in the pool
+    #   currentPopFitness - current population being examined
     ##
     def __init__(self, inputPlayerId):
-        super(AIPlayer, self).__init__(inputPlayerId, "Genetic")
+        super(AIPlayer, self).__init__(inputPlayerId, "Genetic Al")
         self.pool = []
         self.poolIndex = 0
         self.currentPopFitness = None
         self.currgenescores = []
 
         ###
-        self.max = 200000000
-        self.popSize = 10  # 100
-        self.lastStart = -5  # last start time of a game
+        self.max = 200000000      # max score for a win
+        self.popSize = 20 
+        self.lastStart = -5       # last start time of a game
         self.numGamesPerGene = 5  # number of games to play per gene
-        self.poolStates = []  # need to save states in parallel with the pool to print
+        self.poolStates = []      # need to save states in parallel with the pool to print
         self.topCutoff = 5
         self.evidenceFile = "CS421_HW4_EvidenceFile_perkinss18_roddend17.txt"
 
         self.initializeGenePopulation()
 
+    ##
+    # initializeGenePopulation
     # initialize the population of genes with random values
     # then resets the fitness list to default values
     #
+    # Parameters and Return: None
+    ##
     def initializeGenePopulation(self):
         # index set to 0 for the initialization of a population
         self.poolIndex = 0
@@ -74,10 +77,17 @@ class AIPlayer(Player):
             self.pool.append([gene, 0])
             gene = []
 
+    ##
+    # mateGenes
     # generates two child genes from mother and father parent genes
-    # does not yet include a mutation process
+    # 1 round of crossover for each half of the gene, small chance mutation
     #
-    # length of mother & father should be equal as the size is based on the number of tiles
+    # Parameters:
+    #   mom - gene parent 1
+    #   dad - gene parent 2
+    #
+    # Return: array containing 2 children
+    ##
     def mateGenes(self, mom, dad):
         # get the gene
         mother = mom[0]
@@ -98,9 +108,16 @@ class AIPlayer(Player):
                 child[0][index][1] = newval  # value change -- [gene -- [(point,value),...], score]
         return children
 
+    ##
+    # generateNextGenes
     # method to generate the next generation of genes from the old one
-    # returns the next generation of genes based on the top 5% of the population based
-    # on the maximum score obtained from a gene
+    # returns the next generation of genes based on the top 5 of the population based
+    # on the average score obtained from a gene
+    #
+    # Parameters: None
+    #
+    # Return the Next generation
+    ##
     def generateNextGenes(self):
         top = sorted(self.pool, key=lambda x: x[1], reverse=True)[:self.topCutoff]
 
@@ -140,8 +157,6 @@ class AIPlayer(Player):
     #
     # Return: The coordinates of where the construction is to be placed
     ##
-
-    ###--------========= last thing we worked on ===========----------###
     def getPlacement(self, currentState):
         numToPlace = 0
         # implemented by students to return their next move
@@ -193,14 +208,25 @@ class AIPlayer(Player):
     #   currentState - A clone of the current state (GameState)
     #   attackingAnt - The ant currently making the attack (Ant)
     #   enemyLocation - The Locations of the Enemies that can be attacked (Location[])
+    #
+    # Return: random available enemy
     ##
     def getAttack(self, currentState, attackingAnt, enemyLocations):
         # Attack a random enemy.
         return enemyLocations[random.randint(0, len(enemyLocations) - 1)]
 
+    ##
+    # registerWin
     # override Player.py function
     # Update the fitness score of the current gene depending on whether the agent has won or lost
     # Judge whether the current gene's fitness has been fully evaluated & advance to next gene
+    # print fittest gene with each change in generation
+    #
+    # Parameter:
+    #   hasWon - true if you won, false if otherwise
+    #
+    # Return: hasWon
+    ##
     def registerWin(self, hasWon):
         # stop the clock
         survivedfor = time.clock() - self.lastStart
@@ -231,16 +257,18 @@ class AIPlayer(Player):
 
         return hasWon
 
-    ######## going to need to refab this later
+    
     ##
     # asciiPrintState
     #
-    # prints a text representation of a GameState to stdout.  This is useful for
+    # prints a text representation of a GameState to stdout and a file.  This is useful for
     # debugging.
     #
     # Parameters:
     #    state - the state to print
     #
+    # Return: None
+    ##
     def asciiPrintState(self, state):
         f = open(self.evidenceFile, "a")
 
